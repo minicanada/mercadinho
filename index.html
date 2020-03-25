@@ -119,6 +119,7 @@
           }
         },
         mounted () {
+            axios.defaults.headers.post['Access-Control-Allow-Origin'] = '*';
             axios
             .get('http://gsx2json.com/api?id=1Hnksz9ikcghO4DtSrTq_QeAIqsLPKqpI0DQC8CxYO7o&sheet=1&columns=false')
             .then(response => {
