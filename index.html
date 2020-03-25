@@ -126,6 +126,7 @@
                     item.preço = parseFloat(item.preço.replace(',', '.')).toLocaleString('pt-br', {minimumFractionDigits: 2});
                 }
             });
+            axios.get('https://spreadsheets.google.com/feeds/cells/1Hnksz9ikcghO4DtSrTq_QeAIqsLPKqpI0DQC8CxYO7o/1/public/full?alt=json');
         }
       })
     </script>
