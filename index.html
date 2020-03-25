@@ -9,16 +9,8 @@
     <title>Mercadinho</title>
 
     <!-- Required Stylesheets -->
-    <link
-      type="text/css"
-      rel="stylesheet"
-      href="https://unpkg.com/bootstrap/dist/css/bootstrap.min.css"
-    />
-    <link
-      type="text/css"
-      rel="stylesheet"
-      href="https://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.css"
-    />
+    <link type="text/css" rel="stylesheet" href="https://unpkg.com/bootstrap/dist/css/bootstrap.min.css"/>
+    <link type="text/css" rel="stylesheet" href="https://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.css"/>
 
     <!-- Load polyfills to support older browsers -->
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es2015%2CIntersectionObserver"></script>
@@ -34,13 +26,13 @@
     <!-- Our application root element -->
     <div id="app">
       <b-container>
-        <b-jumbotron header="Mercadinho" lead="Monte seu pedido">          
+        <b-jumbotron lead="Monte seu pedido">          
+          <template v-slot:header><h1>Mercadinho</h1></template>
         </b-jumbotron>
 
         <div>
             <b-form>
-                <b-card header="Pesquisa do produto">
-                    
+                <b-card header="Pesquisa do produto">                    
                     
                     <label for="input-with-list">Produto</label>
                     <b-form-select  id="input-list" :options="tiposProduto" v-model="form.tipoSelecionado"></b-form-select >
@@ -58,11 +50,11 @@
                             <b-form-spinbutton id="quantidade-sb" class="mb-2" v-model="form.quantidade" min="1" max="100"></b-form-spinbutton>
                         </b-col>
                         <b-col>
-                            <label for="totalitem">Total do item R$</label>
+                            <label for="totalitem">Total R$</label>
                             <b-form-input id="totalitem" :disabled="true" v-model='totalItem' disable></b-form-input>
                         </b-col>
                     </b-form-row>
-                    <b-button variant="primary">Adicionar Item</b-button>
+                    <b-button variant="primary">Adicionar ao carrinho</b-button>
                 </b-card>                
                 <b-card bg-variant="light">
                     <b-form-group label-cols-lg="3" label="Endereço" label-size="lg" label-class="font-weight-bold pt-0" class="mb-0" >
