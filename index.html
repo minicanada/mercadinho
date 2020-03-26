@@ -37,7 +37,7 @@
                     <b-form-select  id="input-list" :options="tiposProduto" v-model="form.tipoSelecionado"></b-form-select >
                     
                     <label for="input-with-list">Selecione a opção desejada</label>
-                    <b-form-select  v-model="form.produtoSelecionado" :options="listaProdutos" :select-size="5"></b-form-select>
+                    <b-form-select  v-model="form.produtoSelecionado" :options="listaProdutos"></b-form-select>
                                         
                     <b-form-row>    
                         <b-col>
@@ -64,15 +64,15 @@
                     :fields="campos"
                     :table-variant="tableVariant"
                   ></b-table>
-                </b-card>
+                </b-card>               
 
                 <b-card bg-variant="light">
-                  <b-form-group label-cols-lg="3" label="Endereço" label-size="lg" label-class="font-weight-bold pt-0" class="mb-0" >
-                    <b-form-group label-cols-sm="3" label="Rua:" label-align-sm="right" label-for="nested-street" >
+                  <b-form-group label-cols-lg="3" label="Dados para entrega" label-size="lg" label-class="font-weight-bold pt-0" class="mb-0" >
+                    <b-form-group label-cols-sm="3" label="Seu Nome:" label-align-sm="right" label-for="nested-street" >
                       <b-form-input id="nested-street"></b-form-input>
                     </b-form-group>
               
-                    <b-form-group label-cols-sm="3" label="Número:" label-align-sm="right" label-for="nested-street" >
+                    <b-form-group label-cols-sm="3" label="Endereço:" label-align-sm="right" label-for="nested-street" >
                       <b-form-input id="nested-street"></b-form-input>
                     </b-form-group>
                     
@@ -83,9 +83,10 @@
                     <b-form-group label-cols-sm="3" label="Forma de Pagamento:" label-align-sm="right" class="mb-0">
                       <b-form-radio-group class="pt-2" :options="['Cartão', 'Dinheiro']" ></b-form-radio-group>
                     </b-form-group>
-
-                  </b-form-group>
+                  </b-form-group>                                    
                 </b-card>
+                {{ wpplink }}
+                <b-button block variant="success" size="lg" :href="wpplink">Enviar compra</b-button>
             </b-form>
           </div>
           
@@ -98,7 +99,7 @@
         el: '#app',
         data : {
             tableVariant: "light",
-            campos: [ { key: 'descricao', label: 'Descrição'}, { key: 'total', label: 'Total R$'}],
+            campos: [ { key: 'descricao', label: 'Descrição'}, { key: 'total', label: 'Total R$'} ],
             form : {
                 tipoSelecionado:'',
                 produtoSelecionado:'',
@@ -112,13 +113,23 @@
           adicionarAoCarrinho : function(event) {
             this.carrinho.itens.push({
               quantidade: this.form.quantidade, 
-              descricao: this.form.quantidade + ' ' + this.form.produtoSelecionado.descrição + ' ' + this.form.produtoSelecionado.preço,
+              descricao: this.form.quantidade + ' - ' + this.form.tipoSelecionado + ' - ' + this.form.produtoSelecionado.descrição + ' - ' + this.form.produtoSelecionado.preço,
               produto: this.form.produtoSelecionado, total:this.totalItem
             });
           }
         },
 
         computed: {
+          wpplink() {
+            var reduce = '';
+            for (let i = 0; i < this.carrinho.itens.length; i++) {
+              const item = this.carrinho.itens[i];
+              reduce += utf8_encode(item.descricao) + '\n';
+            }
+            reduce = escape(reduce);
+            return "https://api.whatsapp.com/send?phone=557592027488&text=" + reduce;
+          },
+
           showAlert() {
             return this.name.length > 4 ? true : false
           },
