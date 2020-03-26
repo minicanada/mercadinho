@@ -113,7 +113,8 @@
             this.carrinho.itens.push({
               quantidade: this.form.quantidade, 
               descricao: this.form.quantidade + ' - ' + this.form.tipoSelecionado + ' - ' + this.form.produtoSelecionado.descrição + ' - ' + this.form.produtoSelecionado.preço,
-              produto: this.form.produtoSelecionado, total:this.totalItem
+              produto: this.form.produtoSelecionado, 
+              total:this.totalItem
             });
           }
         },
@@ -123,7 +124,7 @@
             var reduce = '';
             for (let i = 0; i < this.carrinho.itens.length; i++) {
               const item = this.carrinho.itens[i];
-              reduce += utf8_encode(item.descricao) + '\n';
+              reduce += item.descricao + '\n';
             }
             reduce = escape(reduce);
             return "https://api.whatsapp.com/send?phone=557592027488&text=" + reduce;
