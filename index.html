@@ -62,11 +62,11 @@
                     :small="true"
                     :items="carrinho.itens"
                     :fields="campos"
-                    :table-variant="tableVariant"
+                    :table-variant="tableVariant"                    
                   >
                   <template v-slot:cell(descricao)="row">
                     <div class="text-left font-weight-light">
-                      {{ row.item.produto.produto }} - {{ row.item.produto.descrição }} - {{ row.item.produto.preço }} <b-badge variant="secondary">x{{ row.item.quantidade }}</b-badge>
+                      <b-badge variant="secondary">{{ row.item.quantidade }}x</b-badge> {{ row.item.produto.produto }} - {{ row.item.produto.descrição }} - {{ row.item.produto.preço }}
                     </div>
                   </template>
 
@@ -134,6 +134,10 @@
         },
 
         methods:{
+          //@row-selected="onRowSelected"
+          onRowSelected(items) {
+            this.selected = items
+          },
           removerItem(item, index, button) {
             console.log(item);
             this.carrinho.itens.splice(index, 1);
