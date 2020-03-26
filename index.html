@@ -62,7 +62,13 @@
                     :items="carrinho.itens"
                     :fields="campos"
                     :table-variant="tableVariant"
-                  ></b-table>
+                  >
+                  <template v-slot:cell(actions)="row">
+                    <b-button size="sm" @click="removerItem(row.item, row.index, $event.target)" class="mr-2">
+                      Remover
+                    </b-button>
+                  </template>
+                </b-table>
                 </b-card>               
                 <br>
                 <b-card bg-variant="light">
@@ -99,7 +105,7 @@
         el: '#app',
         data : {
             tableVariant: "light",
-            campos: [ { key: 'descricao', label: 'Descrição'}, { key: 'total', label: 'Total.R$'} ],
+            campos: [ { key: 'descricao', label: 'Descrição'}, { key: 'total', label: 'Total.R$'}, { key: 'actions', label: 'Remover'} ],
             form : {
                 tipoSelecionado:'',
                 produtoSelecionado:'',
@@ -114,6 +120,9 @@
         },
 
         methods:{
+          removerItem(item, index, button) {
+            this.carrinho.itens.splice(index, 1);
+          },
           adicionarAoCarrinho : function(event) {            
             this.carrinho.itens.push({
               quantidade: this.form.quantidade, 
