@@ -54,9 +54,8 @@
                         </b-col>
                     </b-form-row>
                     <b-button block variant="primary" v-on:click="adicionarAoCarrinho">Adicionar ao carrinho</b-button>
-                </b-card>                
-                
-                <b-card class="mt-3" border-variant="primary" header-bg-variant="primary" header-text-variant="white" align="center" header="Carrinho de compras">
+                </b-card>
+                <b-card class="mt-3" border-variant="primary" header-bg-variant="primary" header-text-variant="white" align="center" v-if="carrinhoComItens" header="Carrinho de compras">
                   <b-table
                     :striped="true"
                     :small="true"
@@ -98,7 +97,7 @@
         el: '#app',
         data : {
             tableVariant: "light",
-            campos: [ { key: 'descricao', label: 'Descrição'}, { key: 'total', label: 'Total R$'} ],
+            campos: [ { key: 'descricao', label: 'Descrição'}, { key: 'total', label: 'Total.R$'} ],
             form : {
                 tipoSelecionado:'',
                 produtoSelecionado:'',
@@ -109,7 +108,7 @@
         },
 
         methods:{
-          adicionarAoCarrinho : function(event) {
+          adicionarAoCarrinho : function(event) {            
             this.carrinho.itens.push({
               quantidade: this.form.quantidade, 
               descricao: this.form.quantidade + ' - ' + this.form.tipoSelecionado + ' - ' + this.form.produtoSelecionado.descrição + ' - ' + this.form.produtoSelecionado.preço,
@@ -143,6 +142,9 @@
           totalItem(){
               var preco = this.form.produtoSelecionado ? this.form.produtoSelecionado.preço.replace(',', '.') : 0;
               return (preco * this.form.quantidade).toLocaleString('pt-br', {minimumFractionDigits: 2});
+          },
+          carrinhoComItens() {
+            return this.carrinho.itens.length > 0;
           }
         },
         mounted () {
