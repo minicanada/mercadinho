@@ -32,8 +32,7 @@
 
         <div>
             <b-form>
-                <b-card header="Pesquisa do produto">                    
-                    
+                <b-card header="Pesquisa do produto">                                        
                     <label for="input-with-list">Produto</label>
                     <b-form-select  id="input-list" :options="tiposProduto" v-model="form.tipoSelecionado"></b-form-select >
                     
@@ -54,32 +53,40 @@
                             <b-form-input id="totalitem" :disabled="true" v-model='totalItem' disable></b-form-input>
                         </b-col>
                     </b-form-row>
-                    <b-button variant="primary">Adicionar ao carrinho</b-button>
+                    <b-button block variant="primary" v-on:click="adicionarAoCarrinho">Adicionar ao carrinho</b-button>
                 </b-card>                
-                <b-card bg-variant="light">
-                    <b-form-group label-cols-lg="3" label="Endereço" label-size="lg" label-class="font-weight-bold pt-0" class="mb-0" >
-                      <b-form-group label-cols-sm="3" label="Rua:" label-align-sm="right" label-for="nested-street" >
-                        <b-form-input id="nested-street"></b-form-input>
-                      </b-form-group>
                 
-                      <b-form-group label-cols-sm="3" label="Número:" label-align-sm="right" label-for="nested-street" >
-                        <b-form-input id="nested-street"></b-form-input>
-                      </b-form-group>
-                      
-                      <b-form-group label-cols-sm="3" label="Ponto de referência:" label-align-sm="right" label-for="nested-city" >
-                        <b-form-input id="nested-city"></b-form-input>
-                      </b-form-group>
-                                      
-                      <b-form-group label-cols-sm="3" label="Forma de Pagamento:" label-align-sm="right" class="mb-0">
-                        <b-form-radio-group class="pt-2" :options="['Cartão', 'Dinheiro']" ></b-form-radio-group>
-                      </b-form-group>
+                <b-card class="mt-3" border-variant="primary" header-bg-variant="primary" header-text-variant="white" align="center" header="Carrinho de compras">
+                  <b-table
+                    :striped="true"
+                    :small="true"
+                    :items="carrinho.itens"
+                    :fields="campos"
+                    :table-variant="tableVariant"
+                  ></b-table>
+                </b-card>
 
+                <b-card bg-variant="light">
+                  <b-form-group label-cols-lg="3" label="Endereço" label-size="lg" label-class="font-weight-bold pt-0" class="mb-0" >
+                    <b-form-group label-cols-sm="3" label="Rua:" label-align-sm="right" label-for="nested-street" >
+                      <b-form-input id="nested-street"></b-form-input>
                     </b-form-group>
-                  </b-card>
+              
+                    <b-form-group label-cols-sm="3" label="Número:" label-align-sm="right" label-for="nested-street" >
+                      <b-form-input id="nested-street"></b-form-input>
+                    </b-form-group>
+                    
+                    <b-form-group label-cols-sm="3" label="Ponto de referência:" label-align-sm="right" label-for="nested-city" >
+                      <b-form-input id="nested-city"></b-form-input>
+                    </b-form-group>
+                                    
+                    <b-form-group label-cols-sm="3" label="Forma de Pagamento:" label-align-sm="right" class="mb-0">
+                      <b-form-radio-group class="pt-2" :options="['Cartão', 'Dinheiro']" ></b-form-radio-group>
+                    </b-form-group>
+
+                  </b-form-group>
+                </b-card>
             </b-form>
-            <b-card class="mt-3" header="Form Data Result">
-              <pre class="m-0">{{ form }}</pre>
-            </b-card>
           </div>
           
       </b-container>
@@ -90,13 +97,27 @@
       window.app = new Vue({
         el: '#app',
         data : {
+            tableVariant: "light",
+            campos: [ { key: 'descricao', label: 'Descrição'}, { key: 'total', label: 'Total R$'}],
             form : {
                 tipoSelecionado:'',
                 produtoSelecionado:'',
                 quantidade:1
             },
+            carrinho: { itens:[] },
             planilha: null,
         },
+
+        methods:{
+          adicionarAoCarrinho : function(event) {
+            this.carrinho.itens.push({
+              quantidade: this.form.quantidade, 
+              descricao: this.form.quantidade + ' ' + this.form.produtoSelecionado.descrição + ' ' + this.form.produtoSelecionado.preço,
+              produto: this.form.produtoSelecionado, total:this.totalItem
+            });
+          }
+        },
+
         computed: {
           showAlert() {
             return this.name.length > 4 ? true : false
@@ -109,24 +130,74 @@
                 function(x) { return { text: x.descrição, value: x}; });
           },
           totalItem(){
-              console.log(this.form.produtoSelecionado.preço);
               var preco = this.form.produtoSelecionado ? this.form.produtoSelecionado.preço.replace(',', '.') : 0;
               return (preco * this.form.quantidade).toLocaleString('pt-br', {minimumFractionDigits: 2});
           }
         },
         mounted () {
-            axios
-            .get('data.json')
-            //.get('http://gsx2json.com/api?id=1Hnksz9ikcghO4DtSrTq_QeAIqsLPKqpI0DQC8CxYO7o&sheet=1&columns=false')
-            .then(response => {
-                this.planilha = response.data.rows;
-                for (let i = 0; i < this.planilha.length; i++) {
-                    const item = this.planilha[i];
-                    console.log(item.preço);
-                    item.preço = parseFloat(item.preço.replace(',', '.')).toLocaleString('pt-br', {minimumFractionDigits: 2});
+          var id = '1Hnksz9ikcghO4DtSrTq_QeAIqsLPKqpI0DQC8CxYO7o',
+          sheet = 1,              
+          url = 'https://spreadsheets.google.com/feeds/list/' + id + '/' + sheet + '/public/values?alt=json';
+
+          axios.get(url)
+          .then(response => {
+            var showRows = true, 
+            showColumns = false,
+            query = '',
+            useIntegers = true;
+            var data = response.data;
+            var responseObj = {};
+            var rows = [];
+            var columns = {};
+            if (data && data.feed && data.feed.entry) {
+              for (var i = 0; i < data.feed.entry.length; i++) {
+                var entry = data.feed.entry[i];
+                var keys = Object.keys(entry);
+                var newRow = {};
+                var queried = false;
+                for (var j = 0; j < keys.length; j++) {
+                  var gsxCheck = keys[j].indexOf('gsx$');
+                  if (gsxCheck > -1) {
+                    var key = keys[j];
+                    var name = key.substring(4);
+                    var content = entry[key];
+                    var value = content.$t;
+                    if (value.toLowerCase().indexOf(query.toLowerCase()) > -1) {
+                      queried = true;
+                    }
+                    if (useIntegers === true && !isNaN(value)) {
+                      value = Number(value);
+                    }
+                    newRow[name] = value;
+                    if (queried === true) {
+                      if (!columns.hasOwnProperty(name)) {
+                        columns[name] = [];
+                        columns[name].push(value);
+                      } else {
+                        columns[name].push(value);
+                      }
+                    }
+                  }
                 }
-            });
-            axios.get('https://spreadsheets.google.com/feeds/cells/1Hnksz9ikcghO4DtSrTq_QeAIqsLPKqpI0DQC8CxYO7o/1/public/full?alt=json');
+                if (queried === true) {
+                  rows.push(newRow);
+                }
+              }
+              if (showColumns === true) {
+                responseObj['columns'] = columns;
+              }
+              if (showRows === true) {
+                responseObj['rows'] = rows;
+              }                
+              //final do gsx2json
+              
+              this.planilha = responseObj.rows;
+              for (let i = 0; i < this.planilha.length; i++) {
+                  const item = this.planilha[i];
+                  item.preço = parseFloat(item.preço.replace(',', '.')).toLocaleString('pt-br', {minimumFractionDigits: 2});
+              }
+            }
+          });            
         }
       })
     </script>
