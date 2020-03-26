@@ -34,11 +34,14 @@
         <div>
             <b-form>
                 <b-card header="Pesquisa do produto">                                        
-                    <label for="input-with-list">Produto</label>
-                    <b-form-select  id="input-list" :options="tiposProduto" v-model="form.tipoSelecionado"></b-form-select >
+                    <label>Categoria</label>
+                    <b-form-select :options="categorias" v-model="form.categoriaSelecionada"></b-form-select >
+
+                    <label>Produto</label>
+                    <b-form-select :options="tiposProduto" v-model="form.tipoSelecionado"></b-form-select >
                     
-                    <label for="input-with-list">Selecione a opção desejada</label>
-                    <b-form-select  v-model="form.produtoSelecionado" :options="listaProdutos"></b-form-select>
+                    <label>Selecione a opção desejada</label>
+                    <b-form-select :options="listaProdutos" v-model="form.produtoSelecionado" ></b-form-select>
                                         
                     <b-form-row>    
                         <b-col>
@@ -176,8 +179,11 @@
           showAlert() {
             return this.name.length > 4 ? true : false
           },
+          categorias(){
+            return _.uniq(_.map(this.planilha, (item) => item.categoria));
+          },
           tiposProduto() {
-              return _.uniq(_.map(this.planilha, (item) => item.produto));
+              return _.uniq(_.map(_.where(this.planilha, { categoria: this.form.categoriaSelecionada }), (item) => item.produto));
           },
           listaProdutos() {
               return _.map(_.where(this.planilha, { produto : this.form.tipoSelecionado }), 
