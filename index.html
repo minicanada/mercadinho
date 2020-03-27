@@ -198,7 +198,7 @@
               const item = this.carrinho.itens[i];
               reduce += item.descricao + '\n';
             }
-            reduce = escape(reduce);
+            reduce = window.encodeURIComponent(reduce);
             return "https://api.whatsapp.com/send?phone=557592027488&text=" + reduce;
           },
 
