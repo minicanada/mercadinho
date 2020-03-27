@@ -102,6 +102,10 @@
                     <b-form-group label-cols-sm="3" label="Seu Nome:" label-align-sm="right" label-for="nested-street" >
                       <b-form-input id="nested-street" v-model="nome"></b-form-input>
                     </b-form-group>
+                    
+                    <b-form-group label-cols-sm="3" label="Telefone/WhatsApp:" label-align-sm="right" label-for="nested-street" >
+                      <b-form-input id="nested-street" v-model="contato"></b-form-input>
+                    </b-form-group>
               
                     <b-form-group label-cols-sm="3" label="Endereço:" label-align-sm="right" label-for="nested-street" >
                       <b-form-input id="nested-street" v-model="endereco"></b-form-input>
@@ -117,8 +121,11 @@
                   </b-form-group>                                    
                 </b-card>
                 <br><br><br><br>                
-                <b-navbar variant="success" fixed='bottom' v-if="carrinhoComItens">              
-                  <b-button block variant="success" size="lg" :href="wpplink">Enviar pedido | Total R$: {{ totalCarrinho }}</b-button>
+                <b-navbar variant="success" fixed='bottom' v-if="carrinhoComItens && !validarFinalizar">
+                  <b-button block variant="success" size="lg" @click="showErro">Enviar pedido | Total R$: {{ totalCarrinho }}</b-button>
+                </b-navbar>                
+                <b-navbar variant="success" fixed='bottom' v-if="validarFinalizar">
+                  <b-button block variant="success" size="lg" @click="showMsgConfirmacao">Enviar pedido | Total R$: {{ totalCarrinho }}</b-button>
                 </b-navbar>                
             </b-form>
           </div>
@@ -141,6 +148,7 @@
                 quantidade:1
             },
             nome:'',
+            contato:'',
             endereco:'',
             referencia:'',
             formaPagamento:'',
@@ -149,6 +157,18 @@
         },
 
         methods:{
+          showErro() {
+            this.$bvModal.msgBoxOk('Informe todos os dados para entrega.', {
+                title: 'Erro!',
+                size: 'sm',
+                buttonSize: 'sm',
+                okVariant: 'success',
+                headerClass: 'p-2 border-bottom-0',
+                footerClass: 'p-2 border-top-0',
+                centered: true
+              })
+          },
+
           onChangeCategoria(event) {
             this.form.produtoSelecionado = '';
             this.form.tipoSelecionado = '';
@@ -183,6 +203,56 @@
                 quantidade:1
             }
             localStorage.setItem('carrinho',  JSON.stringify(this.carrinho));
+          },
+          showMsgConfirmacao() {
+            this.boxTwo = ''
+            this.$bvModal.msgBoxConfirm('Deseja enviar o seu pedido agora?', {
+              title: 'Confirma',
+              size: 'sm',
+              buttonSize: 'sm',
+              okVariant: 'success',
+              okTitle: 'Sim',
+              cancelTitle: 'Cancelar',
+              footerClass: 'p-2',
+              hideHeaderClose: false,
+              centered: true
+            })
+            .then(value => {
+              var reduce = '';
+              reduce += "Nome: " + this.nome + '<br>';
+              reduce += "Endereço: " + this.endereco + '<br>';
+              if(this.referencia != '')
+                reduce += "Ponto de referência: " + this.referencia + '<br>';
+              reduce += "Forma de pagamento: " + this.formaPagamento + '<br>';
+              reduce += '<br><br>';
+              for (let i = 0; i < this.carrinho.itens.length; i++) {
+                const item = this.carrinho.itens[i];
+                reduce += item.descricao + '<br>';
+                reduce += "-------------" + '<br>';
+              }
+              axios.post("https://maker.ifttt.com/trigger/finalizarpedido/with/key/m5nHEIvY9G1P86p4G6hd2lne0HZt8eVeYQiViL7nsge", 
+              { Value1: reduce }, 
+              {
+                headers: {
+                },
+              }).then(function (response) {
+                this.$bvModal.msgBoxOk('Aguarde o nosso contato no número informado.', {
+                title: 'Pedido Enviado!',
+                size: 'sm',
+                buttonSize: 'sm',
+                okVariant: 'success',
+                headerClass: 'p-2 border-bottom-0',
+                footerClass: 'p-2 border-top-0',
+                centered: true
+                });
+              })
+              .catch(function (error) {
+                console.log(error);
+              });
+            })
+            .catch(err => {
+              // An error occurred
+            })
           }
         },
 
@@ -194,9 +264,11 @@
             if(this.referencia != '')
               reduce += "Ponto de referência: " + this.referencia + '\n';
             reduce += "Forma de pagamento: " + this.formaPagamento + '\n';
+            reduce += '\n\n\n';
             for (let i = 0; i < this.carrinho.itens.length; i++) {
               const item = this.carrinho.itens[i];
               reduce += item.descricao + '\n';
+              reduce += "-------------" + '\n';
             }
             reduce = window.encodeURIComponent(reduce);
             return "https://api.whatsapp.com/send?phone=557592027488&text=" + reduce;
@@ -246,6 +318,9 @@
           },
           carrinhoComItens() {
             return this.carrinho.itens.length > 0;
+          },
+          validarFinalizar() {
+            return this.carrinho.itens.length > 0 && this.endereco && this.formaPagamento && this.contato && this.nome;
           }
         },
         
