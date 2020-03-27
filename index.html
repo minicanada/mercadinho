@@ -33,16 +33,25 @@
 
         <div>
             <b-form>
-                <b-card header="Pesquisa do produto">                                        
+                <b-card header="Selecione um produto">                                        
                     <label>Categoria</label>
-                    <b-form-select :options="categorias" v-model="form.categoriaSelecionada"></b-form-select >
+                    <b-form-select :options="categorias" v-model="form.categoriaSelecionada" @change="onChangeCategoria()"></b-form-select >
 
-                    <label>Produto</label>
-                    <b-form-select :options="tiposProduto" v-model="form.tipoSelecionado"></b-form-select >
-                    
-                    <label>Selecione a opção desejada</label>
-                    <b-form-select :options="listaProdutos" v-model="form.produtoSelecionado" ></b-form-select>
-                                        
+                    <b-form-row>
+                      <label>Produto</label>
+                      <b-form-select :options="tiposProduto" v-model="form.tipoSelecionado" @change="onChangeProduto()"></b-form-select >
+                    </b-form-row>
+
+                    <b-form-row>
+                      <label>Selecione a opção desejada</label>
+                      <b-form-select :options="listaProdutos" v-model="form.produtoSelecionado" ></b-form-select>
+                    </b-form-row>
+
+                    <b-form-row v-if="listaSabor.length > 0">
+                      <label>Escolha um tipo</label>
+                      <b-form-select :options="listaSabor" v-model="form.saborSelecionado" ></b-form-select>
+                    </b-form-row>  
+
                     <b-form-row>    
                         <b-col>
                             <label for="preco">Preço R$</label>
@@ -56,8 +65,8 @@
                             <label for="totalitem">Total R$</label>
                             <b-form-input id="totalitem" :disabled="true" v-model='totalItem' disable></b-form-input>
                         </b-col>
+                        <b-button block variant="primary" v-on:click="adicionarAoCarrinho" :disabled="podeAdicionar">Adicionar ao carrinho</b-button>
                     </b-form-row>
-                    <b-button block variant="primary" v-on:click="adicionarAoCarrinho" :disabled="form.produtoSelecionado === ''">Adicionar ao carrinho</b-button>
                 </b-card>
                 <b-card class="mt-3" border-variant="primary" header-bg-variant="primary" header-text-variant="white" v-if="carrinhoComItens" header="Carrinho de compras">
                   <b-table
@@ -69,7 +78,7 @@
                   >
                   <template v-slot:cell(descricao)="row">
                     <div class="text-left font-weight-light">
-                      <b-badge variant="secondary">{{ row.item.quantidade }}x</b-badge> {{ row.item.produto.produto }} - {{ row.item.produto.descrição }} - {{ row.item.produto.preço }}
+                      <b-badge variant="secondary">{{ row.item.quantidade }}x</b-badge> {{ row.item.produto.produto }} - {{ row.item.produto.descrição }} - {{ row.item.produto.tipo }} - {{ row.item.produto.preço }}
                     </div>
                   </template>
 
@@ -107,9 +116,10 @@
                     </b-form-group>
                   </b-form-group>                                    
                 </b-card>
-                <br>
-                <b-button block variant="success" size="lg" :href="wpplink">Enviar compra</b-button>
-                <br>
+                <br><br><br><br>                
+                <b-navbar variant="success" fixed='bottom' v-if="carrinhoComItens">              
+                  <b-button block variant="success" size="lg" :href="wpplink">Finalizar pedido | Total R$: {{ totalCarrinho }}</b-button>
+                </b-navbar>                
             </b-form>
           </div>
           
@@ -125,7 +135,9 @@
             campos: [ { key: 'descricao', label: 'Descrição do item' }, { key: 'total', label: 'Total'}, { key: 'actions', label: ''} ],
             form : {
                 tipoSelecionado:'',
+                categoriaSelecionada:'',
                 produtoSelecionado:'',
+                saborSelecionado: '',
                 quantidade:1
             },
             nome:'',
@@ -137,24 +149,35 @@
         },
 
         methods:{
-          //@row-selected="onRowSelected"
-          onRowSelected(items) {
-            this.selected = items
+          onChangeCategoria(event) {
+            this.form.produtoSelecionado = '';
+            this.form.tipoSelecionado = '';
+            this.form.saborSelecionado = '';
+            this.form.quantidade = 1;
+          },
+          onChangeProduto(event) {
+            this.form.produtoSelecionado = '';
+            this.form.saborSelecionado = '';
+            this.form.quantidade = 1;
           },
           removerItem(item, index, button) {
             console.log(item);
             this.carrinho.itens.splice(index, 1);
           },
           adicionarAoCarrinho : function(event) {            
+            var tipo = this.form.saborSelecionado != '' ? " - " + this.form.saborSelecionado : '';
             this.carrinho.itens.push({
               quantidade: this.form.quantidade, 
-              descricao: this.form.quantidade + ' - ' + this.form.tipoSelecionado + ' - ' + this.form.produtoSelecionado.descrição,
+              descricao: this.form.quantidade + ' - ' + this.form.tipoSelecionado + ' - ' + this.form.produtoSelecionado.descrição + tipo,
+              tipo: tipo,
               produto: this.form.produtoSelecionado, 
-              total:this.totalItem
+              total: this.totalItem,
             });
             this.form = {
                 tipoSelecionado:'',
                 produtoSelecionado:'',
+                saborSelecionado: '',
+                categoriaSelecionada:'',
                 quantidade:1
             }
           }
@@ -187,10 +210,32 @@
           },
           listaProdutos() {
               return _.map(_.where(this.planilha, { produto : this.form.tipoSelecionado }), 
-                function(x) { return { text: x.descrição, value: x}; });
+                function(x) { return { text: x.descrição + ' - R$ ' + x.preço, value: x}; });
+          },
+          listaSabor(){
+            if(this.form.produtoSelecionado != '' && typeof this.form.produtoSelecionado.tipo === "string")
+              return this.form.produtoSelecionado.tipo.split(";");
+            else
+              return [];
+          },
+          temSabor(){
+            if(this.form.produtoSelecionado != '' && typeof this.form.produtoSelecionado.tipo === "string")
+              return this.form.produtoSelecionado.tipo.split(";").length > 0;
+            else
+              return false;
+          },
+          podeAdicionar(){
+            if(this.form.produtoSelecionado != '' && typeof this.form.produtoSelecionado.tipo === "string")
+              return this.form.produtoSelecionado === '' || this.form.saborSelecionado === '';
+            return this.form.produtoSelecionado === '';
           },
           totalCarrinho() {
-              return _.reduce(this.carrinho.itens, function(memo, item){ return memo + item.produto.preço * item.quantidade; }, 0);
+              var totalcompra = 0;
+              for (let i = 0; i < this.carrinho.itens.length; i++) {
+                const item = this.carrinho.itens[i];
+                totalcompra += parseFloat(item.total.replace(',', '.'));
+              }
+              return totalcompra.toLocaleString('pt-br', {minimumFractionDigits: 2});
           },
           totalItem(){
               var preco = this.form.produtoSelecionado ? this.form.produtoSelecionado.preço.replace(',', '.') : 0;
