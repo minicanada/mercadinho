@@ -102,11 +102,7 @@
                     <b-form-group label-cols-sm="3" label="Seu Nome:" label-align-sm="right" label-for="nested-street" >
                       <b-form-input id="nested-street" v-model="nome"></b-form-input>
                     </b-form-group>
-                    
-                    <b-form-group label-cols-sm="3" label="Telefone/WhatsApp:" label-align-sm="right" label-for="nested-street" >
-                      <b-form-input id="nested-street" v-model="contato"></b-form-input>
-                    </b-form-group>
-              
+                                  
                     <b-form-group label-cols-sm="3" label="Endereço:" label-align-sm="right" label-for="nested-street" >
                       <b-form-input id="nested-street" v-model="endereco"></b-form-input>
                     </b-form-group>
@@ -219,33 +215,48 @@
             })
             .then(value => {
               var reduce = '';
-              reduce += "Nome: " + this.nome + '<br>';
-              reduce += "Endereço: " + this.endereco + '<br>';
-              reduce += "Contato: " + this.contato + '<br>';
+              reduce += "Nome: " + this.nome + '\n';
+              reduce += "Endereço: " + this.endereco + '\n';
               if(this.referencia != '')
-                reduce += "Ponto de referência: " + this.referencia + '<br>';
-              reduce += "Forma de pagamento: " + this.formaPagamento + '<br>';
-              reduce += '<br><br>';
+                reduce += "Ponto de referência: " + this.referencia + '\n';
+              reduce += "Forma de pagamento: " + this.formaPagamento + '\n';
+              reduce += '\n\n\n';
               for (let i = 0; i < this.carrinho.itens.length; i++) {
                 const item = this.carrinho.itens[i];
-                reduce += item.descricao + '<br>';
-                reduce += "-------------" + '<br>';
+                reduce += item.descricao + '\n';
+                reduce += "-------------" + '\n';
               }
-              axios.post("http://webhook-3.apphb.com/api/hook", 
-              { Value1: reduce }).then(function (response) {
-                this.$bvModal.msgBoxOk('Aguarde o nosso contato no número informado.', {
-                title: 'Pedido Enviado!',
-                size: 'sm',
-                buttonSize: 'sm',
-                okVariant: 'success',
-                headerClass: 'p-2 border-bottom-0',
-                footerClass: 'p-2 border-top-0',
-                centered: true
-                });
-              })
-              .catch(function (error) {
-                console.log(error);
-              });
+              reduce = window.encodeURIComponent(reduce);
+              reduce = "https://api.whatsapp.com/send?phone=557592027488&text=" + reduce;
+              window.open(reduce, "_self");
+              // var reduce = '';
+              // reduce += "Nome: " + this.nome + '<br>';
+              // reduce += "Endereço: " + this.endereco + '<br>';
+              // reduce += "Contato: " + this.contato + '<br>';
+              // if(this.referencia != '')
+              //   reduce += "Ponto de referência: " + this.referencia + '<br>';
+              // reduce += "Forma de pagamento: " + this.formaPagamento + '<br>';
+              // reduce += '<br><br>';
+              // for (let i = 0; i < this.carrinho.itens.length; i++) {
+              //   const item = this.carrinho.itens[i];
+              //   reduce += item.descricao + '<br>';
+              //   reduce += "-------------" + '<br>';
+              // }
+              // axios.post("https://cors-anywhere.herokuapp.com/https://maker.ifttt.com/trigger/finalizarpedido/with/key/m5nHEIvY9G1P86p4G6hd2lne0HZt8eVeYQiViL7nsge", 
+              // { Value1: reduce }).then(function (response) {
+              //   this.$bvModal.msgBoxOk('Aguarde o nosso contato no número informado.', {
+              //   title: 'Pedido Enviado!',
+              //   size: 'sm',
+              //   buttonSize: 'sm',
+              //   okVariant: 'success',
+              //   headerClass: 'p-2 border-bottom-0',
+              //   footerClass: 'p-2 border-top-0',
+              //   centered: true
+              //   });
+              // })
+              // .catch(function (error) {
+              //   console.log(error);
+              // });
             })
             .catch(err => {
               // An error occurred
@@ -317,7 +328,7 @@
             return this.carrinho.itens.length > 0;
           },
           validarFinalizar() {
-            return this.carrinho.itens.length > 0 && this.endereco && this.formaPagamento && this.contato && this.nome;
+            return this.carrinho.itens.length > 0 && this.endereco && this.formaPagamento && this.nome;
           }
         },
         
