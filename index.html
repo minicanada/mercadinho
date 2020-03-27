@@ -158,7 +158,7 @@
                 title: 'Erro!',
                 size: 'sm',
                 buttonSize: 'sm',
-                okVariant: 'success',
+                okVariant: 'danger',
                 headerClass: 'p-2 border-bottom-0',
                 footerClass: 'p-2 border-top-0',
                 centered: true
@@ -214,21 +214,24 @@
               centered: true
             })
             .then(value => {
-              var reduce = '';
-              reduce += "Nome: " + this.nome + '\n';
-              reduce += "Endereço: " + this.endereco + '\n';
-              if(this.referencia != '')
-                reduce += "Ponto de referência: " + this.referencia + '\n';
-              reduce += "Forma de pagamento: " + this.formaPagamento + '\n';
-              reduce += '\n\n\n';
-              for (let i = 0; i < this.carrinho.itens.length; i++) {
-                const item = this.carrinho.itens[i];
-                reduce += item.descricao + '\n';
-                reduce += "-------------" + '\n';
+              if(value)
+              {
+                var reduce = '';
+                reduce += "Nome: " + this.nome + '\n';
+                reduce += "Endereço: " + this.endereco + '\n';
+                if(this.referencia != '')
+                  reduce += "Ponto de referência: " + this.referencia + '\n';
+                reduce += "Forma de pagamento: " + this.formaPagamento + '\n';
+                reduce += '\n\n\n';
+                for (let i = 0; i < this.carrinho.itens.length; i++) {
+                  const item = this.carrinho.itens[i];
+                  reduce += item.descricao + '\n';
+                  reduce += "-------------" + '\n';
+                }
+                reduce = window.encodeURIComponent(reduce);
+                reduce = "https://api.whatsapp.com/send?phone=557592027488&text=" + reduce;
+                window.open(reduce, "_self");
               }
-              reduce = window.encodeURIComponent(reduce);
-              reduce = "https://api.whatsapp.com/send?phone=557592027488&text=" + reduce;
-              window.open(reduce, "_self");
               // var reduce = '';
               // reduce += "Nome: " + this.nome + '<br>';
               // reduce += "Endereço: " + this.endereco + '<br>';
