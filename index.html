@@ -221,6 +221,7 @@
               var reduce = '';
               reduce += "Nome: " + this.nome + '<br>';
               reduce += "Endereço: " + this.endereco + '<br>';
+              reduce += "Contato: " + this.contato + '<br>';
               if(this.referencia != '')
                 reduce += "Ponto de referência: " + this.referencia + '<br>';
               reduce += "Forma de pagamento: " + this.formaPagamento + '<br>';
@@ -230,12 +231,8 @@
                 reduce += item.descricao + '<br>';
                 reduce += "-------------" + '<br>';
               }
-              axios.post("https://maker.ifttt.com/trigger/finalizarpedido/with/key/m5nHEIvY9G1P86p4G6hd2lne0HZt8eVeYQiViL7nsge", 
-              { Value1: reduce }, 
-              {
-                headers: {
-                },
-              }).then(function (response) {
+              axios.post("http://webhook-3.apphb.com/api/hook", 
+              { Value1: reduce }).then(function (response) {
                 this.$bvModal.msgBoxOk('Aguarde o nosso contato no número informado.', {
                 title: 'Pedido Enviado!',
                 size: 'sm',
